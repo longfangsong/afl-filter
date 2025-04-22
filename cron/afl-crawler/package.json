@@ -1,0 +1,19 @@
+{
+	"name": "afl-crawler",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy -c ./wrangler.jsonc",
+		"dev": "wrangler dev --test-scheduled -c ./wrangler.jsonc",
+		"start": "wrangler dev --test-scheduled -c ./wrangler.jsonc",
+		"cf-typegen": "wrangler types"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20250407.0",
+		"typescript": "^5.5.2",
+		"wrangler": "^4.8.0"
+	},
+	"dependencies": {
+		"@google/generative-ai": "^0.24.0"
+	}
+}
