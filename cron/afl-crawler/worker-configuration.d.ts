@@ -3,4 +3,5 @@
 interface Env {
 	DB: D1Database;
 	GOOGLE_AI_STUDIO_TOKENS: string;
+	KV: KVNamespace;
 }

@@ -12,7 +12,7 @@
 	},
 	"triggers": {
 		"crons": [
-			"*/5 * * * *"
+			"*/10 * * * *"
 		]
 	},
 	// 添加 D1 数据库配置
@@ -21,6 +21,13 @@
 			"binding": "DB",
 			"database_name": "afl-jobs",
 			"database_id": "4d794b93-1e26-4b47-98a6-05e430232ce7"
+		}
+	],
+	// 添加 KV 配置
+	"kv_namespaces": [
+		{
+			"binding": "KV",
+			"id": "35f2cb32ffcc4184912e9b59f2dca4ac"
 		}
 	]
 	/**

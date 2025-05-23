@@ -35,7 +35,7 @@ async function searchOnce(field: string, region: string, startIndex: number, max
 }
 
 export async function allIdsForFieldAndRegion(field: string, region: string): Promise<string[]> {
-	let result: string[] = [];
+	const result: string[] = [];
 	const response = await searchOnce(field, region, 0, 100);
 	result.push(...response.ads.map((ad) => ad.id));
 	const pages = Math.ceil(response.numberOfAds / 100);
