@@ -55,20 +55,16 @@ export default {
 				}
 				// 随机打乱顺序
 				combinations.sort(() => Math.random() - 0.5);
-				// 存储到 KV
-				await env.KV.put('field-region-to-check', JSON.stringify(combinations));
-			}
-
-			// 如果没有待检查的组合，直接返回
-			if (combinations.length === 0) {
-				console.log('没有待检查的组合');
-				return;
 			}
 
 			// 持续处理组合，直到列表为空或出错
 			while (combinations.length > 0) {
 				const currentCombination = combinations[0];
-				console.log(`正在抓取领域: ${fieldMap[currentCombination.field as keyof typeof fieldMap]}, 地区: ${regionMap[currentCombination.region as keyof typeof regionMap]}`);
+				console.log(
+					`正在抓取领域: ${fieldMap[currentCombination.field as keyof typeof fieldMap]}, 地区: ${
+						regionMap[currentCombination.region as keyof typeof regionMap]
+					}`
+				);
 
 				try {
 					// 获取该领域和地区的所有职位ID
@@ -85,46 +81,41 @@ export default {
 
 					// 处理每个新职位
 					for (const id of newJobIds) {
-						try {
-							// 获取职位详情
-							const jobPosting = await getJobPosting(id);
+						// 获取职位详情
+						const jobPosting = await getJobPosting(id);
 
-							// 使用AI分析职位
-							const analysisResult = await aiService.analyzeJobPosting(jobPosting);
-							// 创建职位记录
-							const job: DBTypes.Job = {
-								id: jobPosting.id,
-								field: currentCombination.field as keyof typeof fieldMap,
-								region: currentCombination.region as keyof typeof regionMap,
-								description: jobPosting.description,
-								lastApplicationDate: new Date(jobPosting.lastApplicationDate).getTime(),
-								...analysisResult,
-							};
+						// 使用AI分析职位
+						const analysisResult = await aiService.analyzeJobPosting(jobPosting);
+						// 创建职位记录
+						const job: DBTypes.Job = {
+							id: jobPosting.id,
+							field: currentCombination.field as keyof typeof fieldMap,
+							region: currentCombination.region as keyof typeof regionMap,
+							description: jobPosting.description,
+							lastApplicationDate: new Date(jobPosting.lastApplicationDate).getTime(),
+							...analysisResult,
+						};
 
-							// 保存到数据库
-							await saveJob(env.DB, job);
-						} catch (jobError) {
-							console.error(`处理职位 ${id} 时出错:`, jobError);
-						}
+						// 保存到数据库
+						await saveJob(env.DB, job);
+						console.log(`已保存职位 ${jobPosting.id}`);
 					}
 
 					// 成功处理完当前组合，从列表中移除
 					combinations.shift();
-					// 更新 KV 中的组合列表
-					await env.KV.put('field-region-to-check', JSON.stringify(combinations));
 					console.log(`成功处理组合，剩余 ${combinations.length} 个组合待检查`);
-
 				} catch (error) {
 					console.error(`处理组合时出错:`, error);
-					// 发生错误时，将剩余组合写回 KV
-					await env.KV.put('field-region-to-check', JSON.stringify(combinations));
-					console.log(`已将剩余 ${combinations.length} 个组合写回 KV`);
-					// 出错时退出循环
 					break;
 				}
 			}
 
-			console.log(`处理完成`);
+			await env.KV.put('field-region-to-check', JSON.stringify(combinations));
+			if (combinations.length === 0) {
+				console.log(`全部处理完成`);
+			} else {
+				console.log(`剩余 ${combinations.length} 个组合`);
+			}
 		} catch (error) {
 			console.error(`定时任务执行失败:`, error);
 		}
